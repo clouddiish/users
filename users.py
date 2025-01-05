@@ -48,30 +48,46 @@ def select_all(cur):
     print_results(results)
 
 
-def create_user(con, cur):
+def get_user_data():
     try:
         name = input("Name of the user: ")
         email = input("Email of the user: ")
         age = int(input("Age of the user: "))
+        return (name, email, age)
 
     except ValueError:
         print("Age must be an integer. Try again.")
-        return
 
-    data = (name, email, age)
 
-    cur.execute("INSERT INTO users VALUES(?, ?, ?)", data)
-    con.commit()
+def create_user(con, cur):
+    data = get_user_data()
 
-    print("User created")
+    if data:
+        cur.execute("INSERT INTO users VALUES(?, ?, ?)", data)
+        con.commit()
+
+        print("User created")
+
+
+# def update_user(con, cur):
+#     name = input("Name of the user to update: ")
+
+#     cur.execute("SELECT * FROM users WHERE name = ?", (name,))
+#     results = cur.fetchone()
+
+#     try:
+
+#     except TypeError:
+#         print("User with this name does not exist. Try again.")
 
 
 def run(con, cur):
     create_users_table(cur)
     insert_initial_values(con, cur)
 
-    print(select_all(cur))
+    select_all(cur)
     create_user(con, cur)
+    # update_user(con, cur)
 
 
 con, cur = create_connection_and_cursor("users.db")
