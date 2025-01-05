@@ -21,7 +21,7 @@ def create_users_table(cur):
     print("Table is ready")
 
 
-def insert_initial_values(cur):
+def insert_initial_values(con, cur):
     data = [
         ("Anne Bee", "anne.bee@email.com", 27),
         ("Cee Dee", "cee.dee@email.com", 19),
@@ -36,14 +36,31 @@ def insert_initial_values(cur):
     print("Values inserted")
 
 
-# def create_user(cur)
+def create_user(con, cur):
+    try:
+        name = input("Name of the user: ")
+        email = input("Email of the user: ")
+        age = int(input("Age of the user: "))
+
+    except ValueError:
+        print("Age must be an integer. Try again.")
+        return
+
+    data = (name, email, age)
+
+    cur.execute("INSERT INTO users VALUES(?, ?, ?)", data)
+    con.commit()
+
+    print("User created")
 
 
-def run(cur):
+def run(con, cur):
     create_users_table(cur)
-    insert_initial_values(cur)
+    insert_initial_values(con, cur)
+
+    create_user(con, cur)
 
 
 con, cur = create_connection_and_cursor("users.db")
-run(cur)
+run(con, cur)
 con.close()
