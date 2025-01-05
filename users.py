@@ -42,12 +42,6 @@ def print_results(results):
         print(f"{row[0]} \t{row[1]} \t{row[2]}")
 
 
-def select_all(cur):
-    cur.execute("SELECT * FROM users")
-    results = cur.fetchall()
-    print_results(results)
-
-
 def get_user_data():
     try:
         name = input("Name of the user: ")
@@ -57,6 +51,25 @@ def get_user_data():
 
     except ValueError:
         print("Age must be an integer. Try again.")
+
+
+def check_if_user_exists(cur):
+    name = input("Name of the user to update: ")
+
+    cur.execute("SELECT name FROM users WHERE name=?", (name,))
+    results = cur.fetchone()
+
+    if not results:
+        print("User with this name does not exits. Try again.")
+        return
+
+    return name
+
+
+def select_all(cur):
+    cur.execute("SELECT * FROM users")
+    results = cur.fetchall()
+    print_results(results)
 
 
 def create_user(con, cur):
@@ -70,13 +83,9 @@ def create_user(con, cur):
 
 
 def update_user(con, cur):
-    name = input("Name of the user to update: ")
+    name = check_if_user_exists(cur)
 
-    cur.execute("SELECT name FROM users WHERE name=?", (name,))
-    results = cur.fetchone()
-
-    if not results:
-        print("User with this name does not exits. Try again.")
+    if not name:
         return
 
     data = get_user_data()
@@ -87,6 +96,17 @@ def update_user(con, cur):
         )
         con.commit()
         print(f"User {name} updated.")
+
+
+def delete_user(con, cur):
+    name = input("Name of the user to update: ")
+
+    cur.execute("SELECT name FROM users WHERE name=?", (name,))
+    results = cur.fetchone()
+
+    if not results:
+        print("User with this name does not exits. Try again.")
+        return
 
 
 def run(con, cur):
