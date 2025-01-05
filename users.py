@@ -69,16 +69,24 @@ def create_user(con, cur):
         print("User created")
 
 
-# def update_user(con, cur):
-#     name = input("Name of the user to update: ")
+def update_user(con, cur):
+    name = input("Name of the user to update: ")
 
-#     cur.execute("SELECT * FROM users WHERE name = ?", (name,))
-#     results = cur.fetchone()
+    cur.execute("SELECT name FROM users WHERE name=?", (name,))
+    results = cur.fetchone()
 
-#     try:
+    if not results:
+        print("User with this name does not exits. Try again.")
+        return
 
-#     except TypeError:
-#         print("User with this name does not exist. Try again.")
+    data = get_user_data()
+
+    if data:
+        cur.execute(
+            "UPDATE users SET name=?, email=?, age=? WHERE name=?", (*data, name)
+        )
+        con.commit()
+        print(f"User {name} updated.")
 
 
 def run(con, cur):
@@ -86,8 +94,8 @@ def run(con, cur):
     insert_initial_values(con, cur)
 
     select_all(cur)
-    create_user(con, cur)
-    # update_user(con, cur)
+    # create_user(con, cur)
+    update_user(con, cur)
 
 
 con, cur = create_connection_and_cursor("users.db")
