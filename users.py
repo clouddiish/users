@@ -36,6 +36,18 @@ def insert_initial_values(con, cur):
     print("Values inserted")
 
 
+def print_results(results):
+    print("NAME \t\tEMAIL \t\t\tAGE")
+    for row in results:
+        print(f"{row[0]} \t{row[1]} \t{row[2]}")
+
+
+def select_all(cur):
+    cur.execute("SELECT * FROM users")
+    results = cur.fetchall()
+    print_results(results)
+
+
 def create_user(con, cur):
     try:
         name = input("Name of the user: ")
@@ -58,6 +70,7 @@ def run(con, cur):
     create_users_table(cur)
     insert_initial_values(con, cur)
 
+    print(select_all(cur))
     create_user(con, cur)
 
 
