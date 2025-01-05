@@ -99,14 +99,14 @@ def update_user(con, cur):
 
 
 def delete_user(con, cur):
-    name = input("Name of the user to update: ")
+    name = check_if_user_exists(cur)
 
-    cur.execute("SELECT name FROM users WHERE name=?", (name,))
-    results = cur.fetchone()
-
-    if not results:
-        print("User with this name does not exits. Try again.")
+    if not name:
         return
+
+    cur.execute("DELETE FROM users WHERE name=?", (name,))
+    con.commit()
+    print(f"User {name} deleted.")
 
 
 def run(con, cur):
@@ -115,7 +115,8 @@ def run(con, cur):
 
     select_all(cur)
     # create_user(con, cur)
-    update_user(con, cur)
+    # update_user(con, cur)
+    delete_user(con, cur)
 
 
 con, cur = create_connection_and_cursor("users.db")
