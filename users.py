@@ -18,8 +18,6 @@ def create_users_table(cur):
 
     cur.execute(table)
 
-    print("Table is ready")
-
 
 def insert_initial_values(con, cur):
     data = [
@@ -32,8 +30,6 @@ def insert_initial_values(con, cur):
 
     cur.executemany("INSERT INTO users VALUES(?, ?, ?)", data)
     con.commit()
-
-    print("Values inserted")
 
 
 def print_results(results):
@@ -113,10 +109,37 @@ def run(con, cur):
     create_users_table(cur)
     insert_initial_values(con, cur)
 
-    select_all(cur)
-    # create_user(con, cur)
-    # update_user(con, cur)
-    delete_user(con, cur)
+    while True:
+        action = input(
+            """What do you want to do?
+            - vau - view all users
+            - cu - create user
+            - uu - update user
+            - du - delete user
+            - ex - exit
+            """
+        ).lower()
+
+        match action:
+            case "vau":
+                select_all(cur)
+                print()
+            case "cu":
+                create_user(con, cur)
+                print()
+            case "uu":
+                update_user(con, cur)
+                print()
+            case "du":
+                delete_user(con, cur)
+                print()
+            case "ex":
+                sure = input("Are you sure? (Y/N) ").lower()
+                if sure == "y":
+                    break
+            case _:
+                print("Wrong letter provided.")
+                print()
 
 
 con, cur = create_connection_and_cursor("users.db")
