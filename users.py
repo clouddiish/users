@@ -73,9 +73,31 @@ def select_all(cur):
 
 def select_search(cur):
     search_by = input("Enter name or e-mail to find users: ")
+
     cur.execute(
         "SELECT * FROM users WHERE name LIKE '%' || ? || '%' OR email LIKE '%' || ? || '%'",
         (search_by, search_by),
+    )
+    results = cur.fetchall()
+    print_results(results)
+
+
+def select_filter(cur):
+    first_letter = input(
+        "First letter of the name (or click ENTER if not applicable): "
+    )
+    min_age = input("Minimum age (or click ENTER if not applicable): ")
+    max_age = input("Maximum age (or click ENTER if not applicable): ")
+
+    if not min_age:
+        min_age = -1000
+
+    if not max_age:
+        max_age = 1000
+
+    cur.execute(
+        "SELECT * FROM users WHERE name LIKE ? || '%' AND age > ? AND age < ?",
+        (first_letter, min_age, max_age),
     )
     results = cur.fetchall()
     print_results(results)
@@ -129,7 +151,8 @@ def run(con, cur):
             - cu - create user
             - uu - update user
             - du - delete user
-            - su - search user by name or email
+            - su - search users by name or email
+            - fu - filter users
             - ex - exit
             """
         ).lower()
@@ -149,6 +172,8 @@ def run(con, cur):
                 print()
             case "su":
                 select_search(cur)
+            case "fu":
+                select_filter(cur)
             case "ex":
                 sure = input("Are you sure? (Y/N) ").lower()
                 if sure == "y":
