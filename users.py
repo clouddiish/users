@@ -1,6 +1,10 @@
 import sqlite3
 
 
+class WrongEmailError(Exception):
+    pass
+
+
 def create_connection_and_cursor(db_name):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
@@ -12,7 +16,7 @@ def create_users_table(cur):
 
     table = """ CREATE TABLE users (
             name TEXT,
-            email TEXT,
+            email TEXT UNIQUE,
             age INTEGER
         ); """
 
@@ -66,10 +70,17 @@ def get_user_data():
         name = input("Name of the user: ")
         email = input("Email of the user: ")
         age = int(input("Age of the user: "))
+
+        if "@" not in email:
+            raise WrongEmailError
+
         return (name, email, age)
 
     except ValueError:
         print("Age must be an integer. Try again.")
+
+    except WrongEmailError:
+        print("Email must contain a @. Try again.")
 
 
 def check_if_user_exists(cur):
@@ -126,11 +137,14 @@ def select_filter(cur):
 def create_user(con, cur):
     data = get_user_data()
 
-    if data:
-        cur.execute("INSERT INTO users VALUES(?, ?, ?)", data)
-        con.commit()
+    try:
+        if data:
+            cur.execute("INSERT INTO users VALUES(?, ?, ?)", data)
+            con.commit()
 
-        print("User created")
+            print("User created")
+    except sqlite3.IntegrityError:
+        print("User with this e-mail exists. Try again.")
 
 
 def update_user(con, cur):
