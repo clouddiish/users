@@ -5,6 +5,10 @@ class WrongEmailError(Exception):
     pass
 
 
+class WrongNameError(Exception):
+    pass
+
+
 def create_connection_and_cursor(db_name):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
@@ -74,6 +78,9 @@ def get_user_data():
         if "@" not in email:
             raise WrongEmailError
 
+        if not name:
+            raise WrongNameError
+
         return (name, email, age)
 
     except ValueError:
@@ -81,6 +88,9 @@ def get_user_data():
 
     except WrongEmailError:
         print("Email must contain a @. Try again.")
+
+    except WrongNameError:
+        print("Name cannot be empty. Try again.")
 
 
 def check_if_user_exists(cur):
@@ -143,6 +153,7 @@ def create_user(con, cur):
             con.commit()
 
             print("User created")
+
     except sqlite3.IntegrityError:
         print("User with this e-mail exists. Try again.")
 
