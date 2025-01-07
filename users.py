@@ -2,20 +2,39 @@ import sqlite3
 
 
 class WrongEmailError(Exception):
+    """Exception raised for invalid email input."""
+
     pass
 
 
 class WrongNameError(Exception):
+    """Exception raised for invalid name input."""
+
     pass
 
 
 def create_connection_and_cursor(db_name):
+    """
+    Creates a SQLite database connection and cursor.
+
+    Args:
+        db_name (str): The name of the SQLite database file.
+
+    Returns:
+        tuple: A tuple containing the connection and cursor objects.
+    """
     con = sqlite3.connect(db_name)
     cur = con.cursor()
-    return (con, cur)
+    return con, cur
 
 
 def create_users_table(cur):
+    """
+    Creates the users table in the database.
+
+    Args:
+        cur (sqlite3.Cursor): The SQLite cursor object.
+    """
     cur.execute("DROP TABLE IF EXISTS users")
 
     table = """ CREATE TABLE users (
@@ -23,11 +42,17 @@ def create_users_table(cur):
             email TEXT UNIQUE,
             age INTEGER
         ); """
-
     cur.execute(table)
 
 
 def insert_initial_values(con, cur):
+    """
+    Inserts initial user records into the users table.
+
+    Args:
+        con (sqlite3.Connection): The SQLite connection object.
+        cur (sqlite3.Cursor): The SQLite cursor object.
+    """
     data = [
         ("Anne Bee", "anne.bee@email.com", 27),
         ("Cee Dee", "cee.dee@email.com", 19),
@@ -55,12 +80,17 @@ def insert_initial_values(con, cur):
         ("Jude Nee", "jude.nee@email.com", 34),
         ("Kale Oye", "kale.oye@email.com", 26),
     ]
-
     cur.executemany("INSERT INTO users VALUES(?, ?, ?)", data)
     con.commit()
 
 
 def print_results(results):
+    """
+    Prints query results in a tabular format.
+
+    Args:
+        results (list): A list of tuples containing query results.
+    """
     if results:
         print("NAME \t\tEMAIL \t\t\tAGE")
         for row in results:
@@ -70,6 +100,16 @@ def print_results(results):
 
 
 def get_user_data():
+    """
+    Collects user data from the console input.
+
+    Returns:
+        tuple: A tuple containing the name, email, and age of the user.
+
+    Raises:
+        WrongEmailError: If the email input does not contain '@'.
+        WrongNameError: If the name input is empty.
+    """
     try:
         name = input("Name of the user: ")
         email = input("Email of the user: ")
@@ -81,7 +121,7 @@ def get_user_data():
         if not name:
             raise WrongNameError
 
-        return (name, email, age)
+        return name, email, age
 
     except ValueError:
         print("Age must be an integer. Try again.")
@@ -94,26 +134,47 @@ def get_user_data():
 
 
 def check_if_user_exists(cur):
+    """
+    Checks if a user with a given name exists in the database.
+
+    Args:
+        cur (sqlite3.Cursor): The SQLite cursor object.
+
+    Returns:
+        str or None: The user's name if found, otherwise None.
+    """
     name = input("Name of the user to update: ")
 
     cur.execute("SELECT name FROM users WHERE name=?", (name,))
     results = cur.fetchone()
 
     if not results:
-        print("User with this name does not exits. Try again.")
+        print("User with this name does not exist. Try again.")
         return
 
     return name
 
 
 def select_all(cur):
+    """
+    Retrieves and displays all users from the database.
+
+    Args:
+        cur (sqlite3.Cursor): The SQLite cursor object.
+    """
     cur.execute("SELECT * FROM users")
     results = cur.fetchall()
     print_results(results)
 
 
 def select_search(cur):
-    search_by = input("Enter name or e-mail to find users: ")
+    """
+    Searches for users by name or email.
+
+    Args:
+        cur (sqlite3.Cursor): The SQLite cursor object.
+    """
+    search_by = input("Enter name or email to find users: ")
 
     cur.execute(
         "SELECT * FROM users WHERE name LIKE '%' || ? || '%' OR email LIKE '%' || ? || '%'",
@@ -124,6 +185,12 @@ def select_search(cur):
 
 
 def select_filter(cur):
+    """
+    Filters users based on name's first letter and age range.
+
+    Args:
+        cur (sqlite3.Cursor): The SQLite cursor object.
+    """
     first_letter = input(
         "First letter of the name (or click ENTER if not applicable): "
     )
@@ -145,20 +212,33 @@ def select_filter(cur):
 
 
 def create_user(con, cur):
+    """
+    Creates a new user in the database.
+
+    Args:
+        con (sqlite3.Connection): The SQLite connection object.
+        cur (sqlite3.Cursor): The SQLite cursor object.
+    """
     data = get_user_data()
 
     try:
         if data:
             cur.execute("INSERT INTO users VALUES(?, ?, ?)", data)
             con.commit()
-
             print("User created")
 
     except sqlite3.IntegrityError:
-        print("User with this e-mail exists. Try again.")
+        print("User with this email already exists. Try again.")
 
 
 def update_user(con, cur):
+    """
+    Updates an existing user's data in the database.
+
+    Args:
+        con (sqlite3.Connection): The SQLite connection object.
+        cur (sqlite3.Cursor): The SQLite cursor object.
+    """
     name = check_if_user_exists(cur)
 
     if not name:
@@ -175,6 +255,13 @@ def update_user(con, cur):
 
 
 def delete_user(con, cur):
+    """
+    Deletes a user from the database.
+
+    Args:
+        con (sqlite3.Connection): The SQLite connection object.
+        cur (sqlite3.Cursor): The SQLite cursor object.
+    """
     name = check_if_user_exists(cur)
 
     if not name:
@@ -186,6 +273,13 @@ def delete_user(con, cur):
 
 
 def run(con, cur):
+    """
+    Runs the main application loop for user management.
+
+    Args:
+        con (sqlite3.Connection): The SQLite connection object.
+        cur (sqlite3.Cursor): The SQLite cursor object.
+    """
     create_users_table(cur)
     insert_initial_values(con, cur)
 
@@ -224,7 +318,7 @@ def run(con, cur):
                 if sure == "y":
                     break
             case _:
-                print("Wrong letter provided.")
+                print("Invalid option. Try again.")
                 print()
 
 
