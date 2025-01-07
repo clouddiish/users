@@ -33,9 +33,12 @@ def insert_initial_values(con, cur):
 
 
 def print_results(results):
-    print("NAME \t\tEMAIL \t\t\tAGE")
-    for row in results:
-        print(f"{row[0]} \t{row[1]} \t{row[2]}")
+    if results:
+        print("NAME \t\tEMAIL \t\t\tAGE")
+        for row in results:
+            print(f"{row[0]} \t{row[1]} \t{row[2]}")
+    else:
+        print("No results found.")
 
 
 def get_user_data():
@@ -64,6 +67,16 @@ def check_if_user_exists(cur):
 
 def select_all(cur):
     cur.execute("SELECT * FROM users")
+    results = cur.fetchall()
+    print_results(results)
+
+
+def select_search(cur):
+    search_by = input("Enter name or e-mail to find users: ")
+    cur.execute(
+        "SELECT * FROM users WHERE name LIKE '%' || ? || '%' OR email LIKE '%' || ? || '%'",
+        (search_by, search_by),
+    )
     results = cur.fetchall()
     print_results(results)
 
@@ -116,6 +129,7 @@ def run(con, cur):
             - cu - create user
             - uu - update user
             - du - delete user
+            - su - search user by name or email
             - ex - exit
             """
         ).lower()
@@ -133,6 +147,8 @@ def run(con, cur):
             case "du":
                 delete_user(con, cur)
                 print()
+            case "su":
+                select_search(cur)
             case "ex":
                 sure = input("Are you sure? (Y/N) ").lower()
                 if sure == "y":
